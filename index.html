@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PAX - Modern etkinlik keşif ve yönetim platformu. Konserler, festivaller, workshoplar ve daha fazlası.">
+    <meta name="keywords" content="etkinlik, konser, festival, tiyatro, spor, workshop, eğitim">
+    <title>PAX - Etkinlik Keşif Platformu</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <h1 class="logo">PAX</h1>
+                    <p class="tagline">Etkinlik Keşif Platformu</p>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#" class="nav-link active">Ana Sayfa</a></li>
+                    <li><a href="#events" class="nav-link">Etkinlikler</a></li>
+                    <li><a href="#categories" class="nav-link">Kategoriler</a></li>
+                    <li><a href="#about" class="nav-link">Hakkımızda</a></li>
+                </ul>
+                <button class="hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">Harika Etkinlikleri Keşfedin</h2>
+                <p class="hero-subtitle">Konserlerden workshoplara, festivallerden sergilerə kadar binlerce etkinlik sizi bekliyor</p>
+                
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Etkinlik, sanatçı veya mekan ara...">
+                    <button class="search-button">
+                        <span>Ara</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="categories-section">
+        <div class="container">
+            <h2 class="section-title">Kategoriler</h2>
+            <div class="categories-grid">
+                <button class="category-card active" data-category="all">
+                    <span class="category-icon">🎯</span>
+                    <span class="category-name">Tümü</span>
+                </button>
+                <button class="category-card" data-category="Müzik">
+                    <span class="category-icon">🎵</span>
+                    <span class="category-name">Müzik</span>
+                </button>
+                <button class="category-card" data-category="Sanat & Kültür">
+                    <span class="category-icon">🎭</span>
+                    <span class="category-name">Sanat & Kültür</span>
+                </button>
+                <button class="category-card" data-category="Spor">
+                    <span class="category-icon">🏃</span>
+                    <span class="category-name">Spor</span>
+                </button>
+                <button class="category-card" data-category="Teknoloji">
+                    <span class="category-icon">💻</span>
+                    <span class="category-name">Teknoloji</span>
+                </button>
+                <button class="category-card" data-category="Gastronomi">
+                    <span class="category-icon">🍕</span>
+                    <span class="category-name">Gastronomi</span>
+                </button>
+                <button class="category-card" data-category="Aile">
+                    <span class="category-icon">👨‍👩‍👧‍👦</span>
+                    <span class="category-name">Aile</span>
+                </button>
+                <button class="category-card" data-category="Eğitim">
+                    <span class="category-icon">🎓</span>
+                    <span class="category-name">Eğitim</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters Section -->
+    <section class="filters-section">
+        <div class="container">
+            <div class="filters-wrapper">
+                <div class="filter-group">
+                    <label for="cityFilter">Şehir</label>
+                    <select id="cityFilter" class="filter-select">
+                        <option value="">Tüm Şehirler</option>
+                        <option value="İstanbul">İstanbul</option>
+                        <option value="Ankara">Ankara</option>
+                        <option value="İzmir">İzmir</option>
+                        <option value="Bursa">Bursa</option>
+                        <option value="Antalya">Antalya</option>
+                        <option value="Bodrum">Bodrum</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateFilter">Tarih</label>
+                    <select id="dateFilter" class="filter-select">
+                        <option value="">Tüm Tarihler</option>
+                        <option value="today">Bugün</option>
+                        <option value="week">Bu Hafta</option>
+                        <option value="month">Bu Ay</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="priceFilter">Fiyat</label>
+                    <select id="priceFilter" class="filter-select">
+                        <option value="">Tüm Fiyatlar</option>
+                        <option value="free">Ücretsiz</option>
+                        <option value="0-100">0-100 TL</option>
+                        <option value="100-300">100-300 TL</option>
+                        <option value="300-500">300-500 TL</option>
+                        <option value="500+">500+ TL</option>
+                    </select>
+                </div>
+                
+                <button id="resetFilters" class="reset-button">Filtreleri Sıfırla</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Yaklaşan Etkinlikler</h2>
+                <p class="section-subtitle">Size özel seçilmiş etkinlikler</p>
+            </div>
+            
+            <div id="eventsGrid" class="events-grid">
+                <!-- Events will be dynamically loaded here -->
+            </div>
+            
+            <div id="noResults" class="no-results" style="display: none;">
+                <p>Aradığınız kriterlere uygun etkinlik bulunamadı.</p>
+                <button class="reset-button" onclick="resetAllFilters()">Filtreleri Sıfırla</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Event Details -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <!-- Event details will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PAX</h3>
+                    <p>Modern etkinlik keşif ve yönetim platformu</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Hızlı Bağlantılar</h4>
+                    <ul>
+                        <li><a href="#">Ana Sayfa</a></li>
+                        <li><a href="#events">Etkinlikler</a></li>
+                        <li><a href="#categories">Kategoriler</a></li>
+                        <li><a href="#">İletişim</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Kategoriler</h4>
+                    <ul>
+                        <li><a href="#">Müzik</a></li>
+                        <li><a href="#">Sanat & Kültür</a></li>
+                        <li><a href="#">Spor</a></li>
+                        <li><a href="#">Teknoloji</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Bizi Takip Edin</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Twitter</a>
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 PAX. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/events.js"></script>
+    <script src="scripts/filters.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
