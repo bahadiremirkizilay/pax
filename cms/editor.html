@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Updated: 2026-03-27 with gallery file upload feature -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="theme-color" content="#000000">
+    <title>Event Editor - PAX CMS</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GS721ZWJJF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GS721ZWJJF');
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css?v=20260328M">
+    <link rel="stylesheet" href="cms.css?v=20260328h">
+    <link rel="stylesheet" href="editor.css?v=20260328g">
+</head>
+<body class="event-detail-body editor-mode">
+    <!-- Main Navigation (Identical to homepage) -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <img src="../star-icon.png" alt="Star" class="star-decoration">
+            </div>
+            
+            <div class="nav-center">
+                <div class="logo">
+                    <img src="../pax-logo.png" alt="PAX" class="logo-image">
+                </div>
+            </div>
+            
+            <div class="nav-right">
+                <a href="dashboard.html" class="top-link editor-back-link" aria-label="Go back to dashboard">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Geri
+                </a>
+                <button class="top-link organizer-edit-btn" id="publish-btn" aria-label="Publish event">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Yayınla
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="event-detail" id="event-detail-main">
+        <!-- Hero Section -->
+        <div class="detail-hero">
+            <div class="detail-hero-background" id="hero-background"></div>
+            <div class="detail-hero-container">
+                <div class="detail-hero-grid">
+                    <!-- Image Upload Area -->
+                    <div class="hero-image-wrapper">
+                        <div class="hero-image-container editable-image-zone">
+                            <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Event Image" 
+                                 id="main-event-image" 
+                                 crossorigin="anonymous">
+                            <div class="image-gradient-overlay"></div>
+                            
+                            <!-- Image Upload Overlay -->
+                            <div class="image-upload-overlay-editor">
+                                <div class="upload-options">
+                                    <label class="upload-btn-label">
+                                        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span>Upload Image</span>
+                                        <input type="file" id="image-upload" accept="image/*" style="display: none;" aria-label="Upload event image file">
+                                    </label>
+                                    <div class="upload-or">or</div>
+                                    <input type="url" 
+                                           id="image-url" 
+                                           class="image-url-input" 
+                                           placeholder="Paste image URL"
+                                           aria-label="Event image URL">
+                                </div>
+                            </div>
+                            
+                            <!-- Category Badge -->
+                            <div class="event-category-badge editable">
+                                <select id="event-category" class="category-select" aria-label="Event category">
+                                    <option value="Music Festival">Music Festival</option>
+                                    <option value="Club Night">Club Night</option>
+                                    <option value="Rooftop Party">Rooftop Party</option>
+                                    <option value="Techno Event">Techno Event</option>
+                                    <option value="Beach Party">Beach Party</option>
+                                    <option value="Cultural Event">Cultural Event</option>
+                                    <option value="Live Concert">Live Concert</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Event Header Info -->
+                    <div class="hero-info-wrapper">
+                        <div class="hero-info-content">
+                            <input type="text" 
+                                   id="event-title" 
+                                   class="hero-title editable-input" 
+                                   placeholder="Event Title"
+                                   value="Neon Nights Music Festival"
+                                   aria-label="Event title"
+                                   required>
+                            
+                            <div class="hero-meta-row">
+                                <div class="hero-meta-item editable-meta-group">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <input type="date" id="event-date" class="meta-input date-input" aria-label="Event date" required>
+                                    <span class="meta-sep">•</span>
+                                    <input type="time" id="event-time" class="meta-input time-input" aria-label="Event time" required>
+                                </div>
+                                <div class="hero-meta-item editable-meta-group">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <input type="text" id="event-venue" class="meta-input" placeholder="Venue Name" aria-label="Venue name" required>
+                                    <span class="meta-sep">,</span>
+                                    <input type="text" id="event-city" class="meta-input" placeholder="City" aria-label="City" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-content">
+            <div class="event-content-container">
+                <div class="event-content-grid">
+                    <!-- Main Content Column -->
+                    <div class="event-main-column">
+                        <!-- About Event -->
+                        <div class="content-card about-card">
+                            <div class="card-header">
+                                <h2>About This Event</h2>
+                                <div class="card-accent-line"></div>
+                            </div>
+                            <div class="card-body">
+                                <div class="event-description-text">
+                                    <textarea id="event-description" 
+                                              class="description-editor" 
+                                              placeholder="Describe your event... What makes it special? What should attendees expect?"
+                                              aria-label="Event description"
+                                              rows="8"></textarea>
+                                    
+                                    <div class="editor-section-title">
+                                        <h3>Event Highlights</h3>
+                                        <p class="editor-help-text">Add key features and highlights (press Enter to add)</p>
+                                    </div>
+                                    <ul class="event-highlights editable-list" id="highlights-list">
+                                        <!-- Highlights will be added here -->
+                                    </ul>
+                                    <div class="add-item-form">
+                                        <input type="text" 
+                                               id="new-highlight" 
+                                               class="add-item-input" 
+                                               placeholder="Add highlight (press Enter)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location & Venue -->
+                        <div class="content-card venue-card">
+                            <div class="card-header">
+                                <h2>Location & Venue</h2>
+                                <div class="card-accent-line"></div>
+                            </div>
+                            <div class="card-body">
+                                <div class="venue-map-container">
+                                    <div class="venue-map-placeholder">
+                                        <svg width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.35rem; display: block;">Venue Name (shown to users)</label>
+                                        <input type="text" 
+                                               id="venue-name" 
+                                               class="venue-name-input" 
+                                               placeholder="e.g., Electric Arena">
+                                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.35rem; margin-top: 0.75rem; display: block;">Full Address *</label>
+                                        <textarea id="venue-address" 
+                                                  class="venue-address-input" 
+                                                  placeholder="e.g., 123 Music Boulevard, New York, NY 10001"
+                                                  rows="2"
+                                                  required></textarea>
+                                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.35rem; margin-top: 0.75rem; display: block;">Google Maps Link * <span style="color: var(--neon-primary);">(for map display)</span></label>
+                                        <input type="url" 
+                                               id="location-link" 
+                                               class="venue-name-input" 
+                                               placeholder="https://www.google.com/maps/place/..."
+                                               required>
+                                        <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.35rem; line-height: 1.4;">
+                                            💡 <strong>Important:</strong> Use the <strong>full Google Maps link</strong>, not shortened links (goo.gl)<br>
+                                            How to get: Search location → Share → Copy link → Use the <strong>long URL</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Column -->
+                    <div class="event-sidebar-column">
+                        <!-- Event Details -->
+                        <div class="sidebar-card accordion-card info-sidebar-card" data-accordion="event-details">
+                            <button class="sidebar-card-header accordion-trigger" aria-expanded="true">
+                                <div class="accordion-header-content">
+                                    <h3>Event Details</h3>
+                                    <p class="accordion-preview">Configure event metadata</p>
+                                </div>
+                                <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="sidebar-card-body accordion-content">
+                                <div class="form-field-editor">
+                                    <label>Music Genres</label>
+                                    <input type="text" 
+                                           id="event-genres" 
+                                           class="sidebar-input" 
+                                           placeholder="e.g., House, Techno, Drum & Bass">
+                                </div>
+                                <div class="form-field-editor">
+                                    <label>Age Requirement *</label>
+                                    <select id="event-age" class="sidebar-input" required>
+                                        <option value="">Select age requirement</option>
+                                        <option value="All Ages">All Ages</option>
+                                        <option value="18+">18+</option>
+                                        <option value="21+">21+</option>
+                                        <option value="25+">25+</option>
+                                    </select>
+                                </div>
+                                <div class="form-field-editor">
+                                    <label>Dress Code</label>
+                                    <input type="text" 
+                                           id="event-dress-code" 
+                                           class="sidebar-input" 
+                                           placeholder="e.g., Casual / Club Wear">
+                                </div>
+                                <div class="form-field-editor">
+                                    <label>Price Level</label>
+                                    <select id="event-price-level" class="sidebar-input">
+                                        <option value="1">$ - Budget Friendly</option>
+                                        <option value="2">$$ - Moderate</option>
+                                        <option value="3">$$$ - Premium</option>
+                                        <option value="4">$$$$ - Luxury</option>
+                                        <option value="5">$$$$$ - Exclusive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gallery Images -->
+                        <div class="sidebar-card accordion-card gallery-sidebar-card" data-accordion="gallery">
+                            <button class="sidebar-card-header accordion-trigger" aria-expanded="true">
+                                <div class="accordion-header-content">
+                                    <h3>Gallery Images</h3>
+                                    <p class="accordion-preview">Add event photos</p>
+                                </div>
+                                <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="sidebar-card-body accordion-content">
+                                <div id="gallery-list" class="gallery-editor-list">
+                                    <!-- Gallery images will be added here -->
+                                </div>
+                                <div class="add-gallery-form">
+                                    <div class="gallery-upload-options">
+                                        <label class="gallery-file-label">
+                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>Choose File</span>
+                                            <input type="file" 
+                                                   id="gallery-file-upload" 
+                                                   accept="image/*" 
+                                                   style="display: none;" 
+                                                   aria-label="Upload gallery image from device">
+                                        </label>
+                                        <span class="gallery-or-divider">or</span>
+                                        <input type="url" 
+                                               id="new-gallery-url" 
+                                               class="add-item-input gallery-url-input" 
+                                               placeholder="Paste image URL">
+                                    </div>
+                                    <button class="add-item-btn" id="add-gallery-btn">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Add to Gallery
+                                    </button>
+                                </div>
+                                <p class="form-hint">Tip: Add 4-8 images for best gallery experience</p>
+                            </div>
+                        </div>
+
+                        <!-- Video & Social Media -->
+                        <div class="sidebar-card accordion-card media-sidebar-card" data-accordion="media">
+                            <button class="sidebar-card-header accordion-trigger" aria-expanded="false">
+                                <div class="accordion-header-content">
+                                    <h3>Promo Image</h3>
+                                    <p class="accordion-preview">Optional</p>
+                                </div>
+                                <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="sidebar-card-body accordion-content">
+                                <div class="form-field-editor">
+                                    <label>Promo Image/Instagram</label>
+                                    <div class="gallery-upload-options">
+                                        <label class="gallery-file-label">
+                                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>Choose Image</span>
+                                            <input type="file" 
+                                                   id="promo-image-upload" 
+                                                   accept="image/*" 
+                                                   style="display: none;" 
+                                                   aria-label="Upload promo image">
+                                        </label>
+                                        <span class="gallery-or-divider">or</span>
+                                        <input type="url" 
+                                               id="instagram-url" 
+                                               class="sidebar-input gallery-url-input" 
+                                               placeholder="Instagram URL">
+                                    </div>
+                                    <p class="form-hint">Upload promo image or paste Instagram URL</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organizer Information -->
+                        <div class="sidebar-card accordion-card organizer-sidebar-card" data-accordion="organizer-info">
+                            <button class="sidebar-card-header accordion-trigger" aria-expanded="false">
+                                <div class="accordion-header-content">
+                                    <h3>Organizer Information</h3>
+                                    <p class="accordion-preview">Optional</p>
+                                </div>
+                                <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="sidebar-card-body accordion-content">
+                                <div class="form-field-editor">
+                                    <label>Organizer Name</label>
+                                    <input type="text" 
+                                           id="organizer-name" 
+                                           class="sidebar-input" 
+                                           placeholder="Event organizer or company name">
+                                </div>
+                                <div class="form-field-editor">
+                                    <label>Organizer Bio</label>
+                                    <textarea id="organizer-bio" 
+                                              class="sidebar-input" 
+                                              rows="3"
+                                              placeholder="Brief description about the organizer"></textarea>
+                                </div>
+                                <div class="form-field-editor">
+                                    <label>Total Events Organized</label>
+                                    <input type="number" 
+                                           id="organizer-events" 
+                                           class="sidebar-input" 
+                                           placeholder="e.g., 50"
+                                           min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Artist Lineup -->
+                        <div class="sidebar-card accordion-card lineup-sidebar-card" data-accordion="artist-lineup">
+                            <button class="sidebar-card-header accordion-trigger" aria-expanded="true">
+                                <div class="accordion-header-content">
+                                    <h3>Artist Lineup</h3>
+                                    <p class="accordion-preview">Add performing artists</p>
+                                </div>
+                                <svg class="accordion-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="sidebar-card-body accordion-content">
+                                <div id="artists-list" class="artists-editor-list">
+                                    <!-- Artists will be added here -->
+                                </div>
+                                <div class="add-artist-form">
+                                    <input type="text" 
+                                           id="new-artist-name" 
+                                           class="add-item-input" 
+                                           placeholder="Artist/DJ Name">
+                                    <input type="text" 
+                                           id="new-artist-genre" 
+                                           class="add-item-input" 
+                                           placeholder="Genre/Style">
+                                    <button class="add-item-btn" id="add-artist-btn">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Add Artist
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../script.js?v=20260328e"></script>
+    <script src="cms.js?v=20260328e"></script>
+    <script src="editor.js?v=20260328h"></script>
+</body>
+</html>

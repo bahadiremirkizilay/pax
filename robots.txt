@@ -1,0 +1,24 @@
+# robots.txt for PAX Event Platform
+
+User-agent: *
+Allow: /
+Allow: /about.html
+Allow: /event-detail.html
+
+# Disallow CMS editor pages from crawling
+Disallow: /cms/editor.html
+Disallow: /cms/editor.js
+Disallow: /cms/editor.css
+
+# Allow CMS login and dashboard (for brand visibility)
+Allow: /cms/
+Allow: /cms/dashboard.html
+
+# Disallow admin resources
+Disallow: /cms/cms.js
+
+# Sitemap location
+Sitemap: https://pax.com/sitemap.xml
+
+# Crawl delay (optional, milliseconds)
+Crawl-delay: 1
