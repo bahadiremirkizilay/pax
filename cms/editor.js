@@ -91,6 +91,9 @@ function loadOrganizerProfile() {
   const organizerName = localStorage.getItem('paxOrganizerName') || '';
   const organizerBio = localStorage.getItem('paxOrganizerBio') || '';
   const organizerTotalEvents = localStorage.getItem('paxOrganizerTotalEvents') || '0';
+  const organizerEmail = localStorage.getItem('paxOrganizerEmail') || '';
+  const organizerPhone = localStorage.getItem('paxOrganizerPhone') || '';
+  const organizerInstagram = localStorage.getItem('paxOrganizerInstagram') || '';
   
   // Fill organizer fields with saved profile data
   const organizerNameInput = document.getElementById('organizer-name');
@@ -114,6 +117,7 @@ function saveOrganizerProfile(name, bio, totalEvents) {
   if (name) localStorage.setItem('paxOrganizerName', name);
   if (bio) localStorage.setItem('paxOrganizerBio', bio);
   if (totalEvents) localStorage.setItem('paxOrganizerTotalEvents', totalEvents);
+  // Contact info is saved from profile modal, not from editor
 }
 
 // Convert "8:00 PM" format to "20:00" format
@@ -871,7 +875,9 @@ function collectFormData(existingEvent = null) {
       name: organizerNameValue || existingEvent?.organizer?.name || '',
       bio: organizerBioValue || existingEvent?.organizer?.bio || '',
       events: organizerEventsValue || existingEvent?.organizer?.events || '0',
-      email: localStorage.getItem('paxUserEmail') || existingEvent?.organizer?.email || ''
+      email: localStorage.getItem('paxOrganizerEmail') || localStorage.getItem('paxUserEmail') || existingEvent?.organizer?.email || '',
+      phone: localStorage.getItem('paxOrganizerPhone') || existingEvent?.organizer?.phone || '',
+      instagram: localStorage.getItem('paxOrganizerInstagram') || existingEvent?.organizer?.instagram || ''
     },
   };
 }

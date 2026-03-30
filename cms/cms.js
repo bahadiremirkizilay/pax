@@ -529,11 +529,17 @@ function openProfileModal() {
   const orgName = localStorage.getItem('paxOrganizerName') || '';
   const orgBio = localStorage.getItem('paxOrganizerBio') || '';
   const orgEvents = localStorage.getItem('paxOrganizerTotalEvents') || '0';
+  const orgEmail = localStorage.getItem('paxOrganizerEmail') || '';
+  const orgPhone = localStorage.getItem('paxOrganizerPhone') || '';
+  const orgInstagram = localStorage.getItem('paxOrganizerInstagram') || '';
   
   // Fill form
   document.getElementById('profile-org-name').value = orgName;
   document.getElementById('profile-org-bio').value = orgBio;
   document.getElementById('profile-org-events').value = orgEvents;
+  document.getElementById('profile-org-email').value = orgEmail;
+  document.getElementById('profile-org-phone').value = orgPhone;
+  document.getElementById('profile-org-instagram').value = orgInstagram;
   
   // Show modal
   modal.style.display = 'flex';
@@ -552,6 +558,9 @@ function saveProfileData() {
   const orgName = document.getElementById('profile-org-name').value.trim();
   const orgBio = document.getElementById('profile-org-bio').value.trim();
   const orgEvents = document.getElementById('profile-org-events').value;
+  const orgEmail = document.getElementById('profile-org-email').value.trim();
+  const orgPhone = document.getElementById('profile-org-phone').value.trim();
+  const orgInstagram = document.getElementById('profile-org-instagram').value.trim();
   
   if (!orgName) {
     alert('Please enter an organizer name');
@@ -559,10 +568,20 @@ function saveProfileData() {
     return;
   }
   
+  // Validate: At least one contact method required
+  const loginEmail = localStorage.getItem('paxUserEmail');
+  if (!orgEmail && !orgPhone && !orgInstagram) {
+    alert('En az bir iletişim yöntemi girmelisiniz (Email, Telefon veya Instagram)');
+    return;
+  }
+  
   // Save to localStorage
   localStorage.setItem('paxOrganizerName', orgName);
   localStorage.setItem('paxOrganizerBio', orgBio);
   localStorage.setItem('paxOrganizerTotalEvents', orgEvents);
+  localStorage.setItem('paxOrganizerEmail', orgEmail);
+  localStorage.setItem('paxOrganizerPhone', orgPhone);
+  localStorage.setItem('paxOrganizerInstagram', orgInstagram);
   
   // Ask if user wants to update past events
   const userEmail = localStorage.getItem('paxUserEmail');
@@ -582,6 +601,9 @@ function saveProfileData() {
           event.organizer.name = orgName;
           event.organizer.bio = orgBio;
           event.organizer.events = parseInt(orgEvents) || 0;
+          event.organizer.email = orgEmail || loginEmail;
+          event.organizer.phone = orgPhone;
+          event.organizer.instagram = orgInstagram;
           updatedCount++;
         }
       });

@@ -1375,6 +1375,56 @@ textarea.profile-input {
   box-shadow: 0 8px 20px rgba(27, 116, 199, 0.3);
 }
 
+/* Profile Modal - Contact Section Styles */
+.profile-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  margin: 1.5rem 0;
+}
+
+.profile-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--neon-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.profile-section-label svg {
+  flex-shrink: 0;
+}
+
+.field-note {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.profile-input-with-prefix {
+  padding-left: 2.25rem;
+}
+
 @media (max-width: 768px) {
   .profile-modal-content {
     padding: 1.5rem;

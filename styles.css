@@ -4544,6 +4544,14 @@ html {
   letter-spacing: 0.8px;
 }
 
+/* Organizer Contact Buttons Container */
+.organizer-contact-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
 .organizer-contact-btn {
   width: 100%;
   display: flex;
@@ -4566,12 +4574,25 @@ html {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 6px 20px var(--event-glow);
-  margin-top: 0.5rem;
+  text-decoration: none;
 }
 
 .organizer-contact-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px var(--event-glow);
+}
+
+/* Specific contact button styles */
+.organizer-contact-email {
+  background: linear-gradient(135deg, #1b74c7, #0f5f95);
+}
+
+.organizer-contact-phone {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.organizer-contact-instagram {
+  background: linear-gradient(135deg, #e4405f, #c13584, #833ab4);
 }
 
 /* Add to Calendar Buttons */

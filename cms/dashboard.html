@@ -16,8 +16,8 @@
     </script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles.css?v=20260328M">
-    <link rel="stylesheet" href="cms.css?v=20260328n">
+    <link rel="stylesheet" href="../styles.css?v=20260330a">
+    <link rel="stylesheet" href="cms.css?v=20260330a">
 </head>
 <body>
     <nav class="navbar">
@@ -106,6 +106,47 @@
                                placeholder="e.g., 50"
                                min="0">
                     </div>
+                    
+                    <div class="profile-divider"></div>
+                    
+                    <div class="profile-form-group">
+                        <label class="profile-section-label">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Contact Information (en az 1 tane gerekli)
+                        </label>
+                    </div>
+                    
+                    <div class="profile-form-group">
+                        <label for="profile-org-email">
+                            Email Address
+                            <span class="field-note">(özel email girmezseniz, giriş email'iniz kullanılır)</span>
+                        </label>
+                        <input type="email" 
+                               id="profile-org-email" 
+                               class="profile-input" 
+                               placeholder="contact@yourcompany.com">
+                    </div>
+                    
+                    <div class="profile-form-group">
+                        <label for="profile-org-phone">Phone Number</label>
+                        <input type="tel" 
+                               id="profile-org-phone" 
+                               class="profile-input" 
+                               placeholder="+1 (555) 123-4567">
+                    </div>
+                    
+                    <div class="profile-form-group">
+                        <label for="profile-org-instagram">Instagram Handle</label>
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">@</span>
+                            <input type="text" 
+                                   id="profile-org-instagram" 
+                                   class="profile-input profile-input-with-prefix" 
+                                   placeholder="yourusername">
+                        </div>
+                    </div>
                 </div>
                 <div class="profile-modal-footer">
                     <button class="profile-cancel-btn" id="profile-cancel-btn">Cancel</button>
@@ -149,7 +190,7 @@
         </footer>
     </section>
 
-    <script src="../script.js?v=20260330a"></script>
-    <script src="cms.js?v=20260328N"></script>
+    <script src="../script.js?v=20260330b"></script>
+    <script src="cms.js?v=20260330a"></script>
 </body>
 </html>
