@@ -689,6 +689,41 @@ let eventsData = [
   }
 ];
 
+// Initialize organizer info for demo events
+eventsData = eventsData.map(event => {
+  if (!event.organizer) {
+    let organizerInfo = {
+      email: event.createdBy
+    };
+    
+    if (event.createdBy === 'organizer@pax.com') {
+      organizerInfo = {
+        name: 'PAX Events',
+        bio: 'Professional event organizer bringing the best nightlife experiences',
+        email: 'organizer@pax.com',
+        events: '50'
+      };
+    } else if (event.createdBy === 'admin@pax.com') {
+      organizerInfo = {
+        name: 'PAX Official',
+        bio: 'Official PAX platform events and featured experiences',
+        email: 'admin@pax.com',
+        events: '100'
+      };
+    } else if (event.createdBy === 'organizer2@pax.com') {
+      organizerInfo = {
+        name: 'Night Events Co',
+        bio: 'Nightlife event specialist and party curator',
+        email: 'organizer2@pax.com',
+        events: '30'
+      };
+    }
+    
+    return { ...event, organizer: organizerInfo };
+  }
+  return event;
+});
+
 // ==========================================
 // PERFORMANCE UTILITIES
 // ==========================================
@@ -2140,7 +2175,9 @@ function initializeEventDetailPage() {
   const contactBtn = document.querySelector('.organizer-contact-btn');
   if (contactBtn) {
     contactBtn.addEventListener('click', () => {
-      const event = JSON.parse(localStorage.getItem('selectedEventId'));
+      const eventId = localStorage.getItem('selectedEventId');
+      const event = eventsData.find(e => e.id == eventId);
+      
       if (event && event.organizer && event.organizer.email) {
         const subject = encodeURIComponent(`Etkinlik Hakkında: ${event.title || 'PAX Event'}`);
         const body = encodeURIComponent(`Merhaba,\n\n${event.title || 'Etkinliğiniz'} hakkında bilgi almak istiyorum.\n\nSaygılarımla`);
