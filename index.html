@@ -109,6 +109,97 @@
         <div id="search-results-info" class="search-results-info" style="display: none;"></div>
         
         <div class="section-container">
+            <!-- Filter Drawer -->
+            <div class="filter-drawer" id="filter-drawer" role="dialog" aria-labelledby="filter-drawer-title" aria-modal="true">
+                <div class="filter-drawer-overlay" id="filter-drawer-overlay"></div>
+                <div class="filter-drawer-panel">
+                    <div class="filter-drawer-header">
+                        <h3 id="filter-drawer-title">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <line x1="4" y1="8" x2="20" y2="8" stroke-linecap="round" stroke-width="2"></line>
+                                <line x1="4" y1="16" x2="20" y2="16" stroke-linecap="round" stroke-width="2"></line>
+                                <circle cx="9" cy="8" r="2" fill="currentColor" stroke="none"></circle>
+                                <circle cx="15" cy="16" r="2" fill="currentColor" stroke="none"></circle>
+                            </svg>
+                            Filter Events
+                        </h3>
+                        <button class="filter-drawer-close" id="close-filter-drawer" aria-label="Close filter menu">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="filter-drawer-content">
+                        <!-- Date Range Filter -->
+                        <div class="drawer-filter-group">
+                            <label class="drawer-filter-label">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                </svg>
+                                Date Range
+                            </label>
+                            <div class="date-range-inputs">
+                                <input type="date" id="date-start" class="drawer-filter-input" placeholder="Start Date" aria-label="Filter start date">
+                                <span class="date-separator">to</span>
+                                <input type="date" id="date-end" class="drawer-filter-input" placeholder="End Date" aria-label="Filter end date">
+                            </div>
+                        </div>
+
+                        <!-- Price Level Filter -->
+                        <div class="drawer-filter-group">
+                            <label class="drawer-filter-label">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Price Level
+                            </label>
+                            <div class="drawer-price-checkboxes">
+                                <label class="drawer-checkbox-label">
+                                    <input type="checkbox" class="price-checkbox" value="1" checked>
+                                    <span class="drawer-checkbox-text">$</span>
+                                </label>
+                                <label class="drawer-checkbox-label">
+                                    <input type="checkbox" class="price-checkbox" value="2" checked>
+                                    <span class="drawer-checkbox-text">$$</span>
+                                </label>
+                                <label class="drawer-checkbox-label">
+                                    <input type="checkbox" class="price-checkbox" value="3" checked>
+                                    <span class="drawer-checkbox-text">$$$</span>
+                                </label>
+                                <label class="drawer-checkbox-label">
+                                    <input type="checkbox" class="price-checkbox" value="4" checked>
+                                    <span class="drawer-checkbox-text">$$$$</span>
+                                </label>
+                                <label class="drawer-checkbox-label">
+                                    <input type="checkbox" class="price-checkbox" value="5" checked>
+                                    <span class="drawer-checkbox-text">$$$$$</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-results-display" id="filter-results">Showing all events</div>
+                    </div>
+
+                    <div class="filter-drawer-actions">
+                        <button class="drawer-reset-btn" id="clear-filters">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Reset Filters
+                        </button>
+                        <button class="drawer-apply-btn" id="apply-filters">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="events-grid" id="events-grid">
                 <!-- Event cards will be generated by JavaScript -->
             </div>
