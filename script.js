@@ -772,24 +772,9 @@ function debounce(func, delay = 300) {
 const mobileMenu = document.getElementById('mobile-menu');
 const navMenu = document.getElementById('nav-menu');
 const eventsGrid = document.getElementById('events-grid');
-const dateStartFilter = document.getElementById('date-start');
-const dateEndFilter = document.getElementById('date-end');
-const priceCheckboxes = document.querySelectorAll('.price-checkbox');
-const clearFiltersBtn = document.getElementById('clear-filters');
-const filterResults = document.getElementById('filter-results');
-
-// Filter Drawer Elements
-const openFilterDrawerBtn = document.getElementById('open-filter-drawer');
-const openFilterDrawerMobileBtn = document.getElementById('open-filter-drawer-mobile');
-const closeFilterDrawerBtn = document.getElementById('close-filter-drawer');
-const filterDrawer = document.getElementById('filter-drawer');
-const filterDrawerOverlay = document.getElementById('filter-drawer-overlay');
-const applyFiltersBtn = document.getElementById('apply-filters');
-
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
   initializeNavigation();
-  initializeFilterDrawer();
   initializeSearch();
   renderEvents(eventsData);
   initializeScrollEffects();
@@ -1108,161 +1093,6 @@ function initializeSearch() {
   const dateEndInput = document.getElementById('date-end');
   if (dateStartInput) dateStartInput.addEventListener('change', applyFilters);
   if (dateEndInput) dateEndInput.addEventListener('change', applyFilters);
-}
-
-// ==========================================
-// ADVANCED FILTER SYSTEM
-// ==========================================
-
-// Filter Drawer Functions
-function initializeFilterDrawer() {
-  // Open drawer
-  if (openFilterDrawerBtn) {
-    openFilterDrawerBtn.addEventListener('click', openFilterDrawer);
-  }
-  if (openFilterDrawerMobileBtn) {
-    openFilterDrawerMobileBtn.addEventListener('click', openFilterDrawer);
-  }
-  
-  // Close drawer
-  if (closeFilterDrawerBtn) {
-    closeFilterDrawerBtn.addEventListener('click', closeFilterDrawer);
-  }
-  
-  // Close drawer when clicking overlay
-  if (filterDrawerOverlay) {
-    filterDrawerOverlay.addEventListener('click', closeFilterDrawer);
-  }
-  
-  // Close drawer on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && filterDrawer && filterDrawer.classList.contains('active')) {
-      closeFilterDrawer();
-    }
-  });
-  
-  // Apply filters button
-  if (applyFiltersBtn) {
-    applyFiltersBtn.addEventListener('click', () => {
-      applyFilters();
-      closeFilterDrawer();
-    });
-  }
-  
-  // Date filters - apply on change
-  if (dateStartFilter) {
-    dateStartFilter.addEventListener('change', applyFilters);
-  }
-  if (dateEndFilter) {
-    dateEndFilter.addEventListener('change', applyFilters);
-  }
-  
-  // Price checkboxes - apply on change
-  priceCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', applyFilters);
-  });
-  
-  // Clear filters button
-  if (clearFiltersBtn) {
-    clearFiltersBtn.addEventListener('click', clearAllFilters);
-  }
-}
-
-function openFilterDrawer() {
-  if (filterDrawer) {
-    filterDrawer.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling when drawer is open
-    if (openFilterDrawerBtn) {
-      openFilterDrawerBtn.setAttribute('aria-expanded', 'true');
-    }
-    if (openFilterDrawerMobileBtn) {
-      openFilterDrawerMobileBtn.setAttribute('aria-expanded', 'true');
-    }
-  }
-}
-
-function closeFilterDrawer() {
-  if (filterDrawer) {
-    filterDrawer.classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
-    if (openFilterDrawerBtn) {
-      openFilterDrawerBtn.setAttribute('aria-expanded', 'false');
-    }
-    if (openFilterDrawerMobileBtn) {
-      openFilterDrawerMobileBtn.setAttribute('aria-expanded', 'false');
-    }
-  }
-}
-
-function initializeFilters() {
-  // Deprecated - keeping for compatibility
-  // New drawer system handles initialization
-}
-
-function populateLocationFilter() {
-  // Deprecated - location filter removed
-}
-
-function applyFilters() {
-  let filteredEvents = [...eventsData];
-  
-  // Date range filter
-  if (dateStartFilter && dateStartFilter.value) {
-    const startDate = new Date(dateStartFilter.value);
-    filteredEvents = filteredEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate >= startDate;
-    });
-  }
-  
-  if (dateEndFilter && dateEndFilter.value) {
-    const endDate = new Date(dateEndFilter.value);
-    filteredEvents = filteredEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate <= endDate;
-    });
-  }
-  
-  // Price level filter
-  const selectedPrices = Array.from(priceCheckboxes)
-    .filter(cb => cb.checked)
-    .map(cb => parseInt(cb.value));
-  
-  if (selectedPrices.length > 0 && selectedPrices.length < 5) {
-    filteredEvents = filteredEvents.filter(event =>
-      selectedPrices.includes(event.priceLevel || 1)
-    );
-  }
-  
-  // Update results count
-  updateFilterResults(filteredEvents.length, eventsData.length);
-  
-  // Render filtered events
-  renderEvents(filteredEvents);
-}
-
-function updateFilterResults(filtered, total) {
-  if (!filterResults) return;
-  
-  if (filtered === total) {
-    filterResults.textContent = `Showing all ${total} events`;
-  } else {
-    filterResults.textContent = `Showing ${filtered} of ${total} events`;
-  }
-}
-
-function clearAllFilters() {
-  // Clear dates
-  if (dateStartFilter) dateStartFilter.value = '';
-  if (dateEndFilter) dateEndFilter.value = '';
-  
-  // Check all price checkboxes
-  priceCheckboxes.forEach(checkbox => {
-    checkbox.checked = true;
-  });
-  
-  // Reapply filters (will show all)
-  applyFilters();
 }
 
 // Legacy search functionality - kept for compatibility
@@ -2470,8 +2300,6 @@ let lastScrollTop = 0;
 
 // Watch events-section scroll for navbar transparency
 const eventsSection = document.querySelector('.events-section');
-const filterButtonContainer = document.querySelector('.filter-button-container');
-const filterButton = document.querySelector('.floating-filter-btn');
 
 if (eventsSection) {
   const handleEventsSectionScroll = throttle(function() {
@@ -2480,24 +2308,8 @@ if (eventsSection) {
     
     if (scrollTop > 50) {
       navbar?.classList.add('scrolled');
-      // Move filter button to the right when scrolling
-      if (filterButtonContainer) {
-        filterButtonContainer.style.transform = 'translateX(0)';
-      }
-      // Shrink button to icon only
-      if (filterButton) {
-        filterButton.classList.add('scrolled');
-      }
     } else {
       navbar?.classList.remove('scrolled');
-      // Reset filter button position
-      if (filterButtonContainer) {
-        filterButtonContainer.style.transform = 'translateX(0)';
-      }
-      // Restore button size
-      if (filterButton) {
-        filterButton.classList.remove('scrolled');
-      }
     }
     
     lastScrollTop = scrollTop;

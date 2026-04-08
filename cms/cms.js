@@ -544,6 +544,12 @@ function openProfileModal() {
   // Show modal
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  
+  // Disable scroll on events-section
+  const eventsSection = document.querySelector('.events-section');
+  if (eventsSection) {
+    eventsSection.style.overflow = 'hidden';
+  }
 }
 
 function closeProfileModal() {
@@ -552,6 +558,12 @@ function closeProfileModal() {
   
   modal.style.display = 'none';
   document.body.style.overflow = '';
+  
+  // Re-enable scroll on events-section
+  const eventsSection = document.querySelector('.events-section');
+  if (eventsSection) {
+    eventsSection.style.overflow = '';
+  }
 }
 
 function saveProfileData() {
