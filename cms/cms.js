@@ -390,16 +390,8 @@ if (typeof formatDate === 'undefined') {
 
 // Handle event click for dashboard
 function handleDashboardEventClick(eventId) {
-  // Store event ID for the detail page
-  localStorage.setItem('selectedEventId', eventId);
-  // Get the current path to determine correct relative path
-  const currentPath = window.location.pathname;
-  // Navigate to event detail page with correct relative path
-  if (currentPath.includes('/cms/')) {
-    window.location.href = '../event-detail.html';
-  } else {
-    window.location.href = '/event-detail.html';
-  }
+  // Navigate to editor page to edit the event
+  window.location.href = `editor.html?mode=edit&id=${eventId}`;
 }
 
 function setupDashboardListeners() {

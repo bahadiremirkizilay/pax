@@ -786,6 +786,29 @@ const filterDrawer = document.getElementById('filter-drawer');
 const filterDrawerOverlay = document.getElementById('filter-drawer-overlay');
 const applyFiltersBtn = document.getElementById('apply-filters');
 
+// Prevent scroll function for filter drawer
+function preventScroll(e) {
+  // Allow scroll only inside filter drawer content
+  const filterContent = document.querySelector('.filter-drawer-content');
+  if (!filterContent || !filterContent.contains(e.target)) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+}
+
+// Prevent all body scroll (more aggressive for mobile)
+function preventBodyScroll(e) {
+  const filterContent = document.querySelector('.filter-drawer-content');
+  const drawerPanel = document.querySelector('.filter-drawer-panel');
+  
+  // Only allow scroll if inside the drawer panel
+  if (!drawerPanel || !drawerPanel.contains(e.target)) {
+    e.preventDefault();
+    return false;
+  }
+}
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
   initializeNavigation();
@@ -1170,17 +1193,25 @@ function initializeFilterDrawer() {
 
 function openFilterDrawer() {
   if (filterDrawer) {
-    // Save current scroll position
-    const scrollY = window.scrollY;
-    document.body.style.top = `-${scrollY}px`;
-    
     filterDrawer.classList.add('active');
     document.body.classList.add('filter-drawer-open');
+    document.documentElement.classList.add('filter-drawer-open');
     
     // Reset drawer content scroll position to top
     const drawerContent = document.querySelector('.filter-drawer-content');
     if (drawerContent) {
       drawerContent.scrollTop = 0;
+    }
+    
+    // Prevent scrolling on body and overlay (all devices)
+    document.addEventListener('wheel', preventScroll, { passive: false, capture: true });
+    document.addEventListener('touchmove', preventBodyScroll, { passive: false, capture: true });
+    document.body.addEventListener('wheel', preventScroll, { passive: false });
+    document.body.addEventListener('touchmove', preventBodyScroll, { passive: false });
+    
+    if (filterDrawerOverlay) {
+      filterDrawerOverlay.addEventListener('wheel', preventScroll, { passive: false });
+      filterDrawerOverlay.addEventListener('touchmove', preventBodyScroll, { passive: false });
     }
     
     if (openFilterDrawerBtn) {
@@ -1194,16 +1225,19 @@ function openFilterDrawer() {
 
 function closeFilterDrawer() {
   if (filterDrawer) {
-    // Get scroll position from body top
-    const scrollY = document.body.style.top;
-    
     filterDrawer.classList.remove('active');
     document.body.classList.remove('filter-drawer-open');
-    document.body.style.top = '';
+    document.documentElement.classList.remove('filter-drawer-open');
     
-    // Restore scroll position
-    if (scrollY) {
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    // Remove scroll prevention listeners (all devices)
+    document.removeEventListener('wheel', preventScroll, { capture: true });
+    document.removeEventListener('touchmove', preventBodyScroll, { capture: true });
+    document.body.removeEventListener('wheel', preventScroll);
+    document.body.removeEventListener('touchmove', preventBodyScroll);
+    
+    if (filterDrawerOverlay) {
+      filterDrawerOverlay.removeEventListener('wheel', preventScroll);
+      filterDrawerOverlay.removeEventListener('touchmove', preventBodyScroll);
     }
     
     if (openFilterDrawerBtn) {

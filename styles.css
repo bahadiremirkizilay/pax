@@ -34,22 +34,36 @@ html {
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: #000000;
+  background-image: radial-gradient(circle at top, #160202, #000000);
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
 }
 
 /* Prevent scrolling when filter drawer is open */
+html.filter-drawer-open,
 body.filter-drawer-open {
   overflow: hidden !important;
-  position: fixed;
-  width: 100%;
-  left: 0;
-  right: 0;
+  touch-action: none;
+}
+
+/* On mobile, fix body at top */
+@media (max-width: 768px) {
+  html.filter-drawer-open,
+  body.filter-drawer-open {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0 !important;
+    height: 100vh;
+  }
 }
 
 body::before {
@@ -61,13 +75,15 @@ body::before {
   height: 100%;
   background-color: #000000;
   background-image: url('background.jpg');
-  background-size: auto;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top center;
+  background-repeat: repeat-y;
   background-attachment: scroll;
+  filter: blur(1px);
   opacity: 1;
   pointer-events: none;
   z-index: -1;
+  will-change: auto;
 }
 
 /* Navigation */
@@ -945,7 +961,6 @@ body::before {
   margin-top: 0;
   scroll-behavior: auto;
   background: transparent;
-  contain: layout style paint;
 }
 
 /* Hero Landing - Hidden on Desktop by Default */
@@ -981,6 +996,7 @@ body::before {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
+  position: relative;
 }
 
 .section-header {
@@ -1031,7 +1047,7 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: 10001;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -1053,7 +1069,9 @@ body::before {
   backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.3s ease;
-  z-index: 9999;
+  z-index: 10001;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .filter-drawer.active .filter-drawer-overlay {
@@ -1069,19 +1087,27 @@ body::before {
   width: 100%;
   max-width: 420px;
   background: rgba(10, 10, 10, 0.98);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border-left: 1px solid rgba(27, 116, 199, 0.2);
   box-shadow: -10px 0 50px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10000;
+  z-index: 10002;
 }
 
 .filter-drawer.active .filter-drawer-panel {
   transform: translateX(0);
+}
+
+/* Keep panel border */
+.filter-drawer-panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(27, 116, 199, 0.2);
 }
 
 /* Drawer Header */
@@ -1136,10 +1162,13 @@ body::before {
 .filter-drawer-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Scrollbar for Drawer */
@@ -1354,6 +1383,14 @@ body::before {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  .filter-drawer {
+    top: 0 !important;
+  }
+  
+  .filter-drawer-overlay {
+    top: 0 !important;
+  }
+  
   .filter-drawer-panel {
     max-width: 100%;
     width: 100%;
@@ -1361,6 +1398,7 @@ body::before {
     height: 100vh;
     border-radius: 0;
     border-left: none;
+    top: 0 !important;
   }
   
   .drawer-price-checkboxes {
