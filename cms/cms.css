@@ -48,7 +48,7 @@
 }
 
 .login-card {
-  background: linear-gradient(135deg, rgba(27, 116, 199, 0.05), rgba(204, 0, 0, 0.05));
+  background: linear-gradient(135deg, rgba(27, 116, 199, 0.05), rgba(204, 0, 0, 0.05)), rgba(0, 0, 0, 0.60);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -63,11 +63,19 @@
   margin-bottom: 1.5rem;
 }
 
+.login-top-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
 .login-logo {
-  height: 50px;
+  height: 102px;
   width: auto;
-  margin-bottom: 0.75rem;
   object-fit: contain;
+  grid-column: 2;
+  justify-self: center;
 }
 
 .login-title {
@@ -77,7 +85,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: brightness(1.25);
   margin-bottom: 0.4rem;
+  text-align: center;
 }
 
 .login-subtitle {
@@ -235,16 +245,22 @@
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  gap: 0.3rem;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.813rem;
-  transition: color 0.3s ease;
+  font-size: 0.61rem;
+  padding: 0.34rem 0.64rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  justify-self: start;
 }
 
 .back-link:hover {
   color: var(--neon-primary);
+  border-color: rgba(27, 116, 199, 0.4);
+  background: rgba(27, 116, 199, 0.08);
 }
 
 /* Responsive */
@@ -913,6 +929,13 @@
   opacity: 1;
 }
 
+/* Always show publish button regardless of hover */
+.cms-event-card .event-actions .publish-btn {
+  opacity: 1;
+}
+.cms-event-card:hover .event-actions .publish-btn {
+  opacity: 1;
+}
 .event-action-btn {
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
@@ -958,7 +981,81 @@
   color: #ff6b6b;
 }
 
-/* Event Card Controls (Edit/Delete buttons) */
+/* Publish toggle button */
+.event-action-btn.publish-btn {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.event-action-btn.publish-btn:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.event-action-btn.publish-btn.published {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  opacity: 1 !important;
+}
+
+.event-action-btn.publish-btn.published:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+/* Card-level publish button — always visible at card top-right */
+.card-publish-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 20;
+  background: rgba(239, 68, 68, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #ef4444;
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+  padding: 0;
+  pointer-events: auto;
+}
+
+.card-publish-btn:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45);
+  color: #ef4444;
+  transform: translateY(-2px);
+}
+
+.card-publish-btn.published {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.card-publish-btn.published:hover {
+  background: rgba(16, 185, 129, 0.35);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+  color: #10b981;
+  transform: translateY(-2px);
+}
+
+/* On hover of card, show all buttons */
 .event-controls {
   position: absolute;
   top: 1rem;
@@ -1195,7 +1292,9 @@
   /* Force show editor buttons on mobile - override main styles.css */
   body.editor-mode .nav-right .top-link.editor-back-link,
   body.editor-mode .nav-right .top-link.organizer-edit-btn,
-  body.editor-mode .nav-right #publish-btn {
+  body.editor-mode .nav-right .top-link.editor-publish-now-btn,
+  body.editor-mode .nav-right #publish-btn,
+  body.editor-mode .nav-right #publish-now-btn {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
@@ -1231,6 +1330,25 @@
 /* ===========================
    ORGANIZER PROFILE MODAL
    =========================== */
+
+/* Scroll lock when profile modal is open (same as filter-drawer-open) */
+html.profile-modal-open,
+body.profile-modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+@media (max-width: 768px) {
+  html.profile-modal-open,
+  body.profile-modal-open {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+    top: 0 !important;
+    height: 100vh;
+  }
+}
 
 .profile-modal {
   position: fixed;
@@ -1324,6 +1442,25 @@
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  padding-right: 0.5rem;
+  scrollbar-gutter: stable;
+}
+
+.profile-modal-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.profile-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .profile-form-group {
@@ -1362,8 +1499,28 @@
 }
 
 textarea.profile-input {
-  resize: vertical;
+  resize: none;
   min-height: 100px;
+}
+
+/* Hide number input spinners in profile form */
+.profile-input[type="number"]::-webkit-inner-spin-button,
+.profile-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.profile-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Read-only info fields */
+.profile-input-readonly {
+  opacity: 0.55;
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
 }
 
 .profile-modal-footer {
@@ -1371,6 +1528,11 @@ textarea.profile-input {
   gap: 1rem;
   justify-content: flex-end;
   flex-shrink: 0;
+}
+
+/* Info note — only visible on mobile, sits above Cancel button */
+.profile-footer-note {
+  display: none;
 }
 
 .profile-cancel-btn,
@@ -1454,20 +1616,152 @@ textarea.profile-input {
   padding-left: 2.25rem;
 }
 
+@keyframes profileMobileSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ===========================
+   TOAST NOTIFICATIONS
+   =========================== */
+.pax-toast {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(15, 15, 15, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  max-width: calc(100vw - 2rem);
+  min-width: 260px;
+  animation: paxToastIn 0.25s ease;
+  font-size: 0.9rem;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.pax-toast--error {
+  border: 1px solid rgba(204, 0, 0, 0.55);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(204,0,0,0.1);
+}
+
+.pax-toast--success {
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(34,197,94,0.1);
+}
+
+.pax-toast__icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pax-toast--error .pax-toast__icon {
+  background: rgba(204, 0, 0, 0.2);
+  color: #ff5555;
+  border: 1px solid rgba(204, 0, 0, 0.35);
+}
+
+.pax-toast--success .pax-toast__icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.pax-toast__msg {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.pax-toast__close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.pax-toast__close:hover {
+  color: #fff;
+}
+
+@keyframes paxToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 @media (max-width: 768px) {
-  .profile-modal-content {
-    padding: 1.5rem;
-    max-width: 100%;
+  .profile-modal {
+    padding: 0;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
-  
+
+  .profile-modal-overlay {
+    top: 0 !important;
+    left: 0 !important;
+    position: fixed !important;
+  }
+
+  .profile-modal-content {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    animation: profileMobileSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .profile-modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profile-modal-footer {
+    flex-direction: column;
+    flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .profile-footer-note {
+    display: block;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.78rem;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
   .profile-modal-header h2 {
     font-size: 1.5rem;
   }
-  
-  .profile-modal-footer {
-    flex-direction: column;
-  }
-  
+
   .profile-cancel-btn,
   .profile-save-btn {
     width: 100%;

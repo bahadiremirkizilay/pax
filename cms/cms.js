@@ -25,6 +25,26 @@ function throttle(func, delay = 16) {
 }
 
 // ===========================
+// TOAST NOTIFICATIONS
+// ===========================
+function showToast(message, type = 'error') {
+  const existing = document.getElementById('pax-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'pax-toast';
+  toast.className = `pax-toast pax-toast--${type}`;
+  toast.innerHTML = `
+    <span class="pax-toast__icon">${type === 'success' ? '&#x2713;' : '!'}</span>
+    <span class="pax-toast__msg">${message}</span>
+    <button class="pax-toast__close" aria-label="Kapat">&#x2715;</button>
+  `;
+  document.body.appendChild(toast);
+  toast.querySelector('.pax-toast__close').addEventListener('click', () => toast.remove());
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
+}
+
+// ===========================
 // AUTHENTICATION SYSTEM
 // ===========================
 
@@ -82,7 +102,7 @@ function performLogin(email, password) {
   if (!user || user.password !== password) {
     return {
       success: false,
-      message: 'Invalid email or password'
+      message: 'Geçersiz e-posta veya parola'
     };
   }
   
@@ -226,7 +246,7 @@ function updateUserInfo(user) {
   const userAvatarEl = document.getElementById('user-avatar');
   
   if (userNameEl) userNameEl.textContent = user.name;
-  if (userRoleEl) userRoleEl.textContent = user.role === 'admin' ? 'Administrator' : 'Event Organizer';
+  if (userRoleEl) userRoleEl.textContent = user.role === 'admin' ? 'Yönetici' : 'Etkinlik Organizatörü';
   if (userAvatarEl) {
     const initial = user.name.charAt(0).toUpperCase();
     userAvatarEl.textContent = initial;
@@ -249,27 +269,30 @@ function loadDashboardStats(user) {
   const totalViews = userEvents.reduce((sum, event) => sum + (event.views || 0), 0);
   const upcomingEvents = userEvents.filter(event => new Date(event.date) > new Date()).length;
   
-  // Update stat cards
-  document.getElementById('stat-total-events').textContent = totalEvents;
-  document.getElementById('stat-total-views').textContent = totalViews.toLocaleString();
-  document.getElementById('stat-upcoming').textContent = upcomingEvents;
+  // Update stat cards (elements may not exist on all pages)
+  const elTotal = document.getElementById('stat-total-events');
+  const elViews = document.getElementById('stat-total-views');
+  const elUpcoming = document.getElementById('stat-upcoming');
+  if (elTotal) elTotal.textContent = totalEvents;
+  if (elViews) elViews.textContent = totalViews.toLocaleString();
+  if (elUpcoming) elUpcoming.textContent = upcomingEvents;
 }
 
 function loadDashboardEvents(user) {
-  // Get events from main eventsData (from script.js)
-  if (typeof eventsData === 'undefined') return;
-  
-  let userEvents = eventsData;
-  
+  // Read ALL events from localStorage (including drafts) so organizers can see and manage their drafts
+  const allEvents = JSON.parse(localStorage.getItem('eventsData') || '[]');
+
+  let userEvents = allEvents;
+
   // If organizer, filter to only their events
   if (user.role !== 'admin') {
-    userEvents = eventsData.filter(event => event.createdBy === user.email || event.createdBy === user.id);
+    userEvents = allEvents.filter(event => event.createdBy === user.email || event.createdBy === user.id);
   }
-  
+
   const eventsGrid = document.getElementById('events-grid');
-  
+
   if (!eventsGrid) return;
-  
+
   // Render all user events
   renderDashboardEvents(userEvents, user);
 }
@@ -285,13 +308,13 @@ function renderDashboardEvents(events, user) {
         <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <h3>No Events Found</h3>
-        <p>Start creating amazing nightlife experiences for your audience</p>
+        <h3>Etkinlik Bulunamadı</h3>
+        <p>Seyircileriniz için harika gece hayatı deneyimleri oluşturmaya başlayın</p>
         <button class="create-event-btn-empty" onclick="document.getElementById('create-event-btn').click()">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
-          Create Your First Event
+          İlk Etkinliğinizi Oluşturun
         </button>
       </div>
     `;
@@ -306,21 +329,29 @@ function createDashboardEventCard(event, user) {
   const canEdit = canEditEvent(event.createdBy);
   const viewCount = getEventViewCount ? getEventViewCount(event.id) : 0;
   const priceDisplay = formatPriceLevel ? formatPriceLevel(event.priceLevel) : event.priceLevel;
+  const isPublished = event.status === 'publish';
   
   // Use exact same card structure as homepage with action buttons
   return `
     <div class="event-card cms-event-card" data-event-id="${event.id}" onclick="handleDashboardEventClick(${event.id})" style="cursor: pointer;">
+      ${canEdit ? `
+        <button class="card-publish-btn ${isPublished ? 'published' : ''}" onclick="event.stopPropagation(); togglePublishEvent(${event.id});" title="${isPublished ? 'Yayından Kaldır' : 'Yayınla'}" aria-label="${isPublished ? 'Yayından Kaldır' : 'Yayınla'}">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${isPublished ? 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' : 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21'}"></path>
+          </svg>
+        </button>
+      ` : ''}
       <div class="event-image">
         <img src="${event.image}" alt="${event.title}" loading="lazy">
         <div class="event-category">${event.category}</div>
         ${canEdit ? `
           <div class="event-actions">
-            <button class="event-action-btn edit-btn" onclick="event.stopPropagation(); editEvent(${event.id});" title="Edit Event">
+            <button class="event-action-btn edit-btn" onclick="event.stopPropagation(); editEvent(${event.id});" title="Etkinliği Düzenle">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </button>
-            <button class="event-action-btn delete-btn" onclick="event.stopPropagation(); deleteEvent(${event.id});" title="Delete Event">
+            <button class="event-action-btn delete-btn" onclick="event.stopPropagation(); deleteEvent(${event.id});" title="Etkinliği Sil">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
@@ -346,10 +377,6 @@ function createDashboardEventCard(event, user) {
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
             <span class="event-venue">${event.venue}</span>, ${event.city}
-          </div>
-          <div class="event-views">
-            <span>👁</span>
-            <span>${viewCount} view${viewCount !== 1 ? 's' : ''}</span>
           </div>
           ${event.organizer && event.organizer.name ? `
           <div class="event-organizer-small">
@@ -475,37 +502,72 @@ function editEvent(eventId) {
   window.location.href = `editor.html?mode=edit&id=${eventId}`;
 }
 
+function togglePublishEvent(eventId) {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const allEvents = JSON.parse(localStorage.getItem('eventsData') || '[]');
+  const idx = allEvents.findIndex(e => e.id === eventId);
+  if (idx === -1) return;
+
+  const ev = allEvents[idx];
+  if (!canEditEvent(ev.createdBy)) return;
+
+  const willPublish = ev.status !== 'publish';
+  allEvents[idx] = { ...ev, status: willPublish ? 'publish' : 'draft' };
+  localStorage.setItem('eventsData', JSON.stringify(allEvents));
+
+  // Update in-memory eventsData too
+  const memIdx = eventsData.findIndex(e => e.id === eventId);
+  if (memIdx !== -1) {
+    eventsData[memIdx].status = willPublish ? 'publish' : 'draft';
+  }
+
+  // Re-render dashboard
+  loadDashboardEvents(user);
+}
+
 function deleteEvent(eventId) {
   const user = getCurrentUser();
   if (!user) return;
   
-  // Find event
-  const event = eventsData.find(e => e.id === eventId);
+  // Read ALL events from localStorage (including drafts)
+  const allEvents = JSON.parse(localStorage.getItem('eventsData') || '[]');
+  const event = allEvents.find(e => e.id === eventId);
   if (!event) return;
   
   // Check permissions
   if (!canEditEvent(event.createdBy)) {
-    alert('You do not have permission to delete this event.');
+    showToast('Bu etkinliği silme izniniz yok.', 'error');
     return;
   }
   
   // Confirm deletion
-  if (!confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`)) {
+  if (!confirm(`"${event.title}" etkinliğini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
     return;
   }
   
-  // Delete event
-  const index = eventsData.findIndex(e => e.id === eventId);
+  // Remove from full localStorage array
+  const index = allEvents.findIndex(e => e.id === eventId);
   if (index !== -1) {
-    eventsData.splice(index, 1);
-    
-    // Save to localStorage
-    localStorage.setItem('eventsData', JSON.stringify(eventsData));
-    
+    allEvents.splice(index, 1);
+    localStorage.setItem('eventsData', JSON.stringify(allEvents));
+
+    // Track deleted ID so hardcoded default events are also hidden on the user page
+    const deletedIds = JSON.parse(localStorage.getItem('paxDeletedEventIds') || '[]');
+    if (!deletedIds.includes(eventId)) {
+      deletedIds.push(eventId);
+      localStorage.setItem('paxDeletedEventIds', JSON.stringify(deletedIds));
+    }
+
+    // Also remove from in-memory eventsData if present (published events)
+    const memIdx = eventsData.findIndex(e => e.id === eventId);
+    if (memIdx !== -1) eventsData.splice(memIdx, 1);
+
     // Reload dashboard events
     loadDashboardEvents(user);
-    
-    alert('Event deleted successfully!');
+
+    showToast('Etkinlik başarıyla silindi!', 'success');
   }
 }
 
@@ -513,35 +575,66 @@ function deleteEvent(eventId) {
 // ORGANIZER PROFILE MANAGEMENT
 // ===========================
 
+// Prevent scroll helpers for profile modal (mirror of filter drawer)
+function _profilePreventScroll(e) {
+  const modalBody = document.querySelector('.profile-modal-body');
+  if (!modalBody || !modalBody.contains(e.target)) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+}
+
+function _profilePreventBodyScroll(e) {
+  const modalContent = document.querySelector('.profile-modal-content');
+  if (!modalContent || !modalContent.contains(e.target)) {
+    e.preventDefault();
+    return false;
+  }
+}
+
 function openProfileModal() {
   const modal = document.getElementById('profile-modal');
   if (!modal) return;
   
   // Load current profile data
   const orgName = localStorage.getItem('paxOrganizerName') || '';
-  const orgBio = localStorage.getItem('paxOrganizerBio') || '';
-  const orgEvents = localStorage.getItem('paxOrganizerTotalEvents') || '0';
   const orgEmail = localStorage.getItem('paxOrganizerEmail') || '';
   const orgPhone = localStorage.getItem('paxOrganizerPhone') || '';
   const orgInstagram = localStorage.getItem('paxOrganizerInstagram') || '';
-  
+
+  // Calculate active (future) event count for this organizer
+  const userEmail = localStorage.getItem('paxUserEmail');
+  const allEvents = JSON.parse(localStorage.getItem('eventsData') || '[]');
+  const now = new Date();
+  const activeCount = allEvents.filter(e => e.createdBy === userEmail && new Date(e.date) > now).length;
+
   // Fill form
   document.getElementById('profile-org-name').value = orgName;
-  document.getElementById('profile-org-bio').value = orgBio;
-  document.getElementById('profile-org-events').value = orgEvents;
+  document.getElementById('profile-org-events').value = activeCount;
   document.getElementById('profile-org-email').value = orgEmail;
   document.getElementById('profile-org-phone').value = orgPhone;
   document.getElementById('profile-org-instagram').value = orgInstagram;
   
-  // Show modal
-  modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  
-  // Disable scroll on events-section
+  // Lock the actual scroll container (.events-section) directly
   const eventsSection = document.querySelector('.events-section');
   if (eventsSection) {
     eventsSection.style.overflow = 'hidden';
   }
+
+  // Also lock body/html for safety
+  document.body.classList.add('profile-modal-open');
+  document.documentElement.classList.add('profile-modal-open');
+
+  // Prevent all touch scroll on background (mobile Safari)
+  document.addEventListener('touchmove', _profilePreventBodyScroll, { passive: false, capture: true });
+
+  // Show modal
+  modal.style.display = 'flex';
+
+  // Reset modal body scroll to top
+  const modalBody = modal.querySelector('.profile-modal-body');
+  if (modalBody) modalBody.scrollTop = 0;
 }
 
 function closeProfileModal() {
@@ -549,25 +642,27 @@ function closeProfileModal() {
   if (!modal) return;
   
   modal.style.display = 'none';
-  document.body.style.overflow = '';
-  
-  // Re-enable scroll on events-section
+
+  // Restore .events-section scroll
   const eventsSection = document.querySelector('.events-section');
   if (eventsSection) {
     eventsSection.style.overflow = '';
   }
+
+  // Remove body/html lock
+  document.body.classList.remove('profile-modal-open');
+  document.documentElement.classList.remove('profile-modal-open');
+  document.removeEventListener('touchmove', _profilePreventBodyScroll, { capture: true });
 }
 
 function saveProfileData() {
   const orgName = document.getElementById('profile-org-name').value.trim();
-  const orgBio = document.getElementById('profile-org-bio').value.trim();
-  const orgEvents = document.getElementById('profile-org-events').value;
   const orgEmail = document.getElementById('profile-org-email').value.trim();
   const orgPhone = document.getElementById('profile-org-phone').value.trim();
   const orgInstagram = document.getElementById('profile-org-instagram').value.trim();
   
   if (!orgName) {
-    alert('Please enter an organizer name');
+    showToast('Lütfen organizatör adı giriniz', 'error');
     document.getElementById('profile-org-name').focus();
     return;
   }
@@ -575,52 +670,42 @@ function saveProfileData() {
   // Validate: At least one contact method required
   const loginEmail = localStorage.getItem('paxUserEmail');
   if (!orgEmail && !orgPhone && !orgInstagram) {
-    alert('En az bir iletişim yöntemi girmelisiniz (Email, Telefon veya Instagram)');
+    showToast('En az bir iletişim yöntemi girmelisiniz (Email, Telefon veya Instagram)', 'error');
     return;
   }
   
   // Save to localStorage
   localStorage.setItem('paxOrganizerName', orgName);
-  localStorage.setItem('paxOrganizerBio', orgBio);
-  localStorage.setItem('paxOrganizerTotalEvents', orgEvents);
   localStorage.setItem('paxOrganizerEmail', orgEmail);
   localStorage.setItem('paxOrganizerPhone', orgPhone);
   localStorage.setItem('paxOrganizerInstagram', orgInstagram);
-  
-  // Ask if user wants to update past events
+
+  // Calculate active event count to sync into events
   const userEmail = localStorage.getItem('paxUserEmail');
-  const eventsData = JSON.parse(localStorage.getItem('paxEventsData') || '[]');
+  const eventsData = JSON.parse(localStorage.getItem('eventsData') || '[]');
+  const now = new Date();
+  const activeCount = eventsData.filter(e => e.createdBy === userEmail && new Date(e.date) > now).length;
   
-  // Count how many past events belong to this user
-  const userEvents = eventsData.filter(event => event.createdBy === userEmail);
-  
-  if (userEvents.length > 0) {
-    const updatePast = confirm(`Profile saved! You have ${userEvents.length} existing event(s). Do you want to update the organizer information in all your past events with this new profile?`);
-    
-    if (updatePast) {
-      // Update all user's events with new profile data
-      let updatedCount = 0;
-      eventsData.forEach(event => {
-        if (event.createdBy === userEmail && event.organizer) {
-          event.organizer.name = orgName;
-          event.organizer.bio = orgBio;
-          event.organizer.events = parseInt(orgEvents) || 0;
-          event.organizer.email = orgEmail || loginEmail;
-          event.organizer.phone = orgPhone;
-          event.organizer.instagram = orgInstagram;
-          updatedCount++;
-        }
-      });
-      
-      // Save updated events back to localStorage
-      localStorage.setItem('paxEventsData', JSON.stringify(eventsData));
-      
-      alert(`Success! Profile updated and applied to ${updatedCount} existing event(s).`);
-    } else {
-      alert('Profile saved! This information will be used for all your new events.');
+  let updatedCount = 0;
+  eventsData.forEach(event => {
+    if (event.createdBy === userEmail) {
+      if (!event.organizer) event.organizer = {};
+      event.organizer.name = orgName;
+      event.organizer.events = activeCount;
+      event.organizer.email = orgEmail || loginEmail;
+      event.organizer.phone = orgPhone;
+      event.organizer.instagram = orgInstagram;
+      updatedCount++;
     }
+  });
+  
+  // Save updated events back to localStorage
+  localStorage.setItem('eventsData', JSON.stringify(eventsData));
+  
+  if (updatedCount > 0) {
+    showToast(`Profil kaydedildi! ${updatedCount} etkinliğinizdeki bilgiler güncellendi.`, 'success');
   } else {
-    alert('Profile saved successfully! This information will be used for all your new events.');
+    showToast('Profil başarıyla kaydedildi!', 'success');
   }
   
   closeProfileModal();
@@ -631,7 +716,7 @@ function saveProfileData() {
   if (userEmail && userRole) {
     const user = { email: userEmail, role: userRole, name: userName || 'User' };
     // Reload events from localStorage first
-    const storedEvents = localStorage.getItem('paxEventsData');
+    const storedEvents = localStorage.getItem('eventsData');
     if (storedEvents && typeof eventsData !== 'undefined') {
       window.eventsData = JSON.parse(storedEvents);
     }

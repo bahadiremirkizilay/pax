@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#000000">
-    <title>Organizer Portal - PAX</title>
+    <title>Organizatör Portalı - PAX</title>
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GS721ZWJJF"></script>
@@ -24,15 +24,22 @@
         <div class="login-card">
             <!-- Logo Header -->
             <div class="login-header">
-                <img src="../pax-logo.png" alt="PAX" class="login-logo">
-                <h1 class="login-title">Organizer Portal</h1>
-                <p class="login-subtitle">Manage your events and reach thousands of nightlife enthusiasts</p>
+                <div class="login-top-row">
+                    <a href="../" class="back-link">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        PAX'a Dön
+                    </a>
+                    <img src="../pax-logo.png" alt="PAX" class="login-logo">
+                </div>
+                <h1 class="login-title">Organizatör Portalı</h1>
             </div>
 
             <!-- Login Form -->
             <form class="cms-login-form" id="cms-login-form">
                 <div class="form-field">
-                    <label for="email">Email Address</label>
+                    <label for="email">E-posta Adresi</label>
                     <div class="input-wrapper">
                         <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
@@ -41,7 +48,7 @@
                             type="email" 
                             id="email" 
                             class="form-input" 
-                            placeholder="your@email.com" 
+                            placeholder="ornek@email.com" 
                             required
                             autocomplete="email"
                         >
@@ -49,7 +56,7 @@
                 </div>
 
                 <div class="form-field">
-                    <label for="password">Password</label>
+                    <label for="password">Parola</label>
                     <div class="input-wrapper">
                         <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
@@ -58,7 +65,7 @@
                             type="password" 
                             id="password" 
                             class="form-input" 
-                            placeholder="Enter your password" 
+                            placeholder="Parolanızı girin" 
                             required
                             autocomplete="current-password"
                         >
@@ -73,15 +80,15 @@
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                     </svg>
-                    <span>Access Portal</span>
+                    <span>Portala Giriş</span>
                 </button>
             </form>
 
             <!-- Footer Links -->
             <div class="login-footer">
-                <a href="#" class="footer-link">Forgot Password?</a>
+                <a href="#" class="footer-link">Parolamı Unuttum?</a>
                 <span class="footer-separator">•</span>
-                <a href="#" class="footer-link">Request Organizer Account</a>
+                <a href="#" class="footer-link">Organizatör Hesabı Talebi</a>
             </div>
 
             <!-- Info Note -->
@@ -89,16 +96,9 @@
                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path>
                 </svg>
-                <p>This portal is exclusively for event organizers and platform administrators. Regular users do not need an account.</p>
+                <p>Bu portal yalnızca etkinlik organizatörleri ve platform yöneticileri içindir. Normal kullanıcıların hesap açmasına gerek yoktur.</p>
             </div>
 
-            <!-- Back to Main Site -->
-            <a href="../" class="back-link">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Back to PAX
-            </a>
         </div>
     </div>
 

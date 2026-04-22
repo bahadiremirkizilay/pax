@@ -930,7 +930,7 @@ function renderEvents(events) {
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            ${formatDate(event.date)} • ${event.time}
+            ${formatDate(event.date)} • ${formatTime(event.time)}
           </div>
           <div class="event-location">
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -939,9 +939,12 @@ function renderEvents(events) {
             </svg>
             <span class="event-venue">${event.venue}</span>, ${event.city}
           </div>
-          <div class="event-views">
-            <span>👁</span>
-            <span>${viewCount} view${viewCount !== 1 ? 's' : ''}</span>
+          <div class="event-organizer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            ${event.organizer ? event.organizer.name || event.organizer : 'PAX Events'}
           </div>
         </div>
         <div class="event-price">${priceDisplay}</div>
@@ -1131,6 +1134,47 @@ function initializeSearch() {
   const dateEndInput = document.getElementById('date-end');
   if (dateStartInput) dateStartInput.addEventListener('change', applyFilters);
   if (dateEndInput) dateEndInput.addEventListener('change', applyFilters);
+
+  const organizerFilterInput = document.getElementById('organizer-search-filter');
+  if (organizerFilterInput) {
+    organizerFilterInput.addEventListener('input', () => {
+      applyFilters();
+      showOrganizerSuggestions(organizerFilterInput);
+    });
+
+    // Keyboard navigation & close on blur
+    organizerFilterInput.addEventListener('keydown', (e) => {
+      const list = document.getElementById('organizer-suggestions');
+      const items = list ? list.querySelectorAll('.organizer-suggestion-item') : [];
+      const activeItem = list ? list.querySelector('.organizer-suggestion-item.active') : null;
+      let activeIndex = Array.from(items).indexOf(activeItem);
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = items[activeIndex + 1] || items[0];
+        if (activeItem) activeItem.classList.remove('active');
+        if (next) next.classList.add('active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = items[activeIndex - 1] || items[items.length - 1];
+        if (activeItem) activeItem.classList.remove('active');
+        if (prev) prev.classList.add('active');
+      } else if (e.key === 'Enter') {
+        if (activeItem) {
+          e.preventDefault();
+          organizerFilterInput.value = activeItem.dataset.value;
+          closeOrganizerSuggestions();
+          applyFilters();
+        }
+      } else if (e.key === 'Escape') {
+        closeOrganizerSuggestions();
+      }
+    });
+
+    organizerFilterInput.addEventListener('blur', () => {
+      setTimeout(closeOrganizerSuggestions, 150);
+    });
+  }
 }
 
 // ==========================================
@@ -1188,6 +1232,19 @@ function initializeFilterDrawer() {
   // Clear filters button
   if (clearFiltersBtn) {
     clearFiltersBtn.addEventListener('click', clearAllFilters);
+  }
+
+  // Event type filter - populate and setup toggle
+  populateEventTypeFilter();
+  const eventTypeToggle = document.getElementById('event-type-toggle');
+  const eventTypeList = document.getElementById('event-type-list');
+  if (eventTypeToggle && eventTypeList) {
+    eventTypeToggle.addEventListener('click', () => {
+      const expanded = eventTypeToggle.getAttribute('aria-expanded') === 'true';
+      eventTypeToggle.setAttribute('aria-expanded', String(!expanded));
+      eventTypeList.classList.toggle('open', !expanded);
+      eventTypeList.setAttribute('aria-hidden', String(expanded));
+    });
   }
 }
 
@@ -1258,6 +1315,27 @@ function populateLocationFilter() {
   // Deprecated - location filter removed
 }
 
+function populateEventTypeFilter() {
+  const list = document.getElementById('event-type-list');
+  if (!list) return;
+
+  const categories = [...new Set(
+    eventsData.map(e => e.category).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'tr'));
+
+  list.innerHTML = categories.map(cat => {
+    const escaped = cat.replace(/"/g, '&quot;');
+    return `<label class="event-type-item">
+      <input type="checkbox" class="event-type-checkbox" value="${escaped}" checked>
+      <span>${cat}</span>
+    </label>`;
+  }).join('');
+
+  list.querySelectorAll('.event-type-checkbox').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+  });
+}
+
 function applyFilters() {
   let filteredEvents = [...eventsData];
   
@@ -1278,6 +1356,25 @@ function applyFilters() {
     });
   }
   
+  // Organizer filter
+  const organizerFilter = document.getElementById('organizer-search-filter');
+  if (organizerFilter && organizerFilter.value.trim()) {
+    const orgQuery = organizerFilter.value.trim().toLowerCase();
+    filteredEvents = filteredEvents.filter(event =>
+      event.organizer && event.organizer.name &&
+      event.organizer.name.toLowerCase().includes(orgQuery)
+    );
+  }
+
+  // Event type filter
+  const allTypeCheckboxes = Array.from(document.querySelectorAll('.event-type-checkbox'));
+  const selectedTypes = allTypeCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+  if (allTypeCheckboxes.length > 0 && selectedTypes.length < allTypeCheckboxes.length) {
+    filteredEvents = filteredEvents.filter(event =>
+      selectedTypes.includes(event.category)
+    );
+  }
+
   // Price level filter
   const selectedPrices = Array.from(priceCheckboxes)
     .filter(cb => cb.checked)
@@ -1300,9 +1397,60 @@ function updateFilterResults(filtered, total) {
   if (!filterResults) return;
   
   if (filtered === total) {
-    filterResults.textContent = `Showing all ${total} events`;
+    filterResults.textContent = `Tüm ${total} etkinlik gösteriliyor`;
   } else {
-    filterResults.textContent = `Showing ${filtered} of ${total} events`;
+    filterResults.textContent = `${total} etkinlikten ${filtered} tanesi gösteriliyor`;
+  }
+}
+
+function showOrganizerSuggestions(input) {
+  const list = document.getElementById('organizer-suggestions');
+  if (!list) return;
+
+  const query = input.value.trim().toLowerCase();
+
+  // Collect unique organizer names
+  const names = [...new Set(
+    eventsData
+      .map(e => e.organizer && e.organizer.name ? e.organizer.name.trim() : null)
+      .filter(Boolean)
+  )];
+
+  if (!query) {
+    closeOrganizerSuggestions();
+    return;
+  }
+
+  const matches = names.filter(n => n.toLowerCase().includes(query));
+
+  if (matches.length === 0) {
+    closeOrganizerSuggestions();
+    return;
+  }
+
+  list.innerHTML = matches.map(name => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const highlighted = name.replace(new RegExp(`(${escaped.replace(escaped, query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))})`, 'gi'), '<mark>$1</mark>');
+    return `<li class="organizer-suggestion-item" data-value="${name}" role="option">${highlighted}</li>`;
+  }).join('');
+
+  list.querySelectorAll('.organizer-suggestion-item').forEach(item => {
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      input.value = item.dataset.value;
+      closeOrganizerSuggestions();
+      applyFilters();
+    });
+  });
+
+  list.classList.add('open');
+}
+
+function closeOrganizerSuggestions() {
+  const list = document.getElementById('organizer-suggestions');
+  if (list) {
+    list.classList.remove('open');
+    list.innerHTML = '';
   }
 }
 
@@ -1311,10 +1459,28 @@ function clearAllFilters() {
   if (dateStartFilter) dateStartFilter.value = '';
   if (dateEndFilter) dateEndFilter.value = '';
   
+  // Clear organizer search
+  const organizerFilter = document.getElementById('organizer-search-filter');
+  if (organizerFilter) organizerFilter.value = '';
+  
   // Check all price checkboxes
   priceCheckboxes.forEach(checkbox => {
     checkbox.checked = true;
   });
+
+  // Reset event type checkboxes and collapse list
+  document.querySelectorAll('.event-type-checkbox').forEach(cb => {
+    cb.checked = true;
+  });
+  const eventTypeListReset = document.getElementById('event-type-list');
+  const eventTypeToggleReset = document.getElementById('event-type-toggle');
+  if (eventTypeListReset) {
+    eventTypeListReset.classList.remove('open');
+    eventTypeListReset.setAttribute('aria-hidden', 'true');
+  }
+  if (eventTypeToggleReset) {
+    eventTypeToggleReset.setAttribute('aria-expanded', 'false');
+  }
   
   // Reapply filters (will show all)
   applyFilters();
@@ -1416,20 +1582,84 @@ if (window.location.pathname.includes('event-detail.html')) {
 }
 
 function loadEventDetails() {
-  const eventId = localStorage.getItem('selectedEventId');
-  if (!eventId) return;
+  // Check if this is a preview from the CMS editor
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPreview = urlParams.get('preview') === 'true';
+  const shareId = urlParams.get('share');
 
-  const event = eventsData.find(e => e.id == eventId);
-  if (!event) return;
-  
+  let event;
+  if (isPreview) {
+    const previewRaw = localStorage.getItem('paxPreviewEvent');
+    if (!previewRaw) return;
+    try {
+      event = JSON.parse(previewRaw);
+    } catch (e) { return; }
+
+    // Only show the preview banner when NOT inside an iframe (new-tab mode)
+    const isInsideIframe = window.self !== window.top;
+    if (!isInsideIframe) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(23,104,170,0.92);color:#fff;text-align:center;padding:8px 16px;font-size:0.85rem;font-family:Inter,sans-serif;backdrop-filter:blur(6px);';
+      banner.innerHTML = '<strong>Önizleme Modu</strong> — Bu sayfa kaydedilmemiş değişiklikleri göstermektedir. &nbsp;<button onclick="this.closest(\'div\').remove();document.body.style.paddingTop=\'\';" style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:6px;color:#fff;padding:3px 10px;cursor:pointer;font-size:0.8rem;">Kapat</button>';
+      document.body.appendChild(banner);
+      document.body.style.paddingTop = '38px';
+    } else {
+      // Inside iframe: hide the back button from the navbar and style scrollbar dark
+      const style = document.createElement('style');
+      style.textContent = `
+        .back-btn { display: none !important; }
+        .nav-left { visibility: hidden; }
+        .nav-share-btn { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+        * { scrollbar-width: thin; scrollbar-color: #2a2a2a #0a0a0a; }
+      `;
+      document.head.appendChild(style);
+    }
+  } else if (shareId) {
+    const decodedShareId = decodeURIComponent(shareId);
+    // 1) Check paxSharedEvents (organizer explicitly shared)
+    const sharedRaw = localStorage.getItem('paxSharedEvents');
+    if (sharedRaw) {
+      try {
+        const sharedEvents = JSON.parse(sharedRaw);
+        event = sharedEvents[decodedShareId] || null;
+      } catch (e) { event = null; }
+    }
+    // 2) Fallback: look in raw localStorage eventsData (includes drafts saved via Kaydet)
+    if (!event) {
+      const rawStored = localStorage.getItem('eventsData');
+      if (rawStored) {
+        try {
+          const allStored = JSON.parse(rawStored);
+          event = allStored.find(e => String(e.id) === decodedShareId) || null;
+        } catch (e) {}
+      }
+    }
+    // 3) Fallback: published eventsData in memory
+    if (!event) {
+      event = eventsData.find(e => String(e.id) === decodedShareId) || null;
+    }
+    if (!event) return;
+  } else {
+    const eventId = localStorage.getItem('selectedEventId');
+    if (!eventId) return;
+    event = eventsData.find(e => e.id == eventId);
+    if (!event) return;
+  }
+
   console.log('=== EVENT DETAILS PAGE ===');
-  console.log('Event ID:', eventId);
+  console.log('Event ID:', event.id);
   console.log('Event object:', event);
   console.log('Event locationLink:', event.locationLink);
   console.log('Event venueAddress:', event.venueAddress);
 
-  // Check if user is organizer and can edit this event
-  checkOrganizerEditPermission(event);
+  // Check if user is organizer and can edit this event (skip in preview/share)
+  if (!isPreview && !shareId) {
+    checkOrganizerEditPermission(event);
+  }
 
   // Update page title and meta
   document.title = `${event.title} - PAX`;
@@ -1462,7 +1692,7 @@ function loadEventDetails() {
       <line x1="8" y1="2" x2="8" y2="6"></line>
       <line x1="3" y1="10" x2="21" y2="10"></line>
     </svg>
-    <span>${formatDate(event.date)} • ${event.time}</span>
+    <span>${formatDate(event.date)} • ${formatTime(event.time)}</span>
   `;
   
   if (eventLocation) eventLocation.innerHTML = `
@@ -1493,8 +1723,8 @@ function loadEventDetails() {
   loadEventArtists(event);
   loadEventGallery(event);
   loadEventVideo(event);
-  loadEventInstagram(event);
   loadEventOrganizer(event);
+  loadTicketLink(event);
 }
 
 // Load event description dynamically
@@ -1534,7 +1764,7 @@ function loadEventHighlights(event) {
 // Load event metadata in sidebar
 function loadEventMetadata(event) {
   // Update date & time in sidebar
-  const formattedDateTime = `${formatDate(event.date)} • ${event.time}`;
+  const formattedDateTime = `${formatDate(event.date)} • ${formatTime(event.time)}`;
   
   // Update accordion preview
   const accordionPreview = document.querySelector('.accordion-preview');
@@ -1758,60 +1988,6 @@ function loadEventVideo(event) {
   }
 }
 
-// Load Instagram embed
-function loadEventInstagram(event) {
-  const instagramCard = document.getElementById('instagram-card');
-  const instagramContainer = document.getElementById('instagram-container');
-  
-  if (!instagramCard || !instagramContainer) return;
-  
-  if (event.instagramUrl) {
-    instagramCard.style.display = 'block';
-    
-    // Extract Instagram post ID
-    const postId = extractInstagramId(event.instagramUrl);
-    if (postId) {
-      instagramContainer.innerHTML = `
-        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/${postId}/" data-instgrm-version="14" style="max-width:540px; min-width:326px; width:100%;">
-          <div style="padding:16px;">
-            <a href="https://www.instagram.com/p/${postId}/" target="_blank" rel="noopener noreferrer" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;">
-              <div style="display: flex; flex-direction: row; align-items: center;">
-                <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div>
-                <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;">
-                  <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div>
-                  <div style="background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div>
-                </div>
-              </div>
-              <div style="padding: 19% 0;"></div>
-              <div style="display:block; height:50px; margin:0 auto 12px; width:50px;">
-                <svg width="50px" height="50px" viewBox="0 0 60 60"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg>
-              </div>
-              <div style="padding-top: 8px;">
-                <div style="color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this post on Instagram</div>
-              </div>
-            </a>
-          </div>
-        </blockquote>
-      `;
-      
-      // Load Instagram embed script
-      if (!document.querySelector('script[src*="instagram.com/embed.js"]')) {
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = '//www.instagram.com/embed.js';
-        document.body.appendChild(script);
-      } else {
-        // If script already loaded, reinitialize
-        if (window.instgrm) {
-          window.instgrm.Embeds.process();
-        }
-      }
-    }
-  } else {
-    instagramCard.style.display = 'none';
-  }
-}
-
 // Load event organizer information
 function loadEventOrganizer(event) {
   const organizerPreview = document.getElementById('organizer-preview');
@@ -1823,7 +1999,14 @@ function loadEventOrganizer(event) {
   // Get organizer data from event or use defaults
   const orgName = event.organizer?.name || 'PAX Events';
   const orgBio = event.organizer?.bio || 'Event organizer at PAX';
-  const orgEvents = event.organizer?.events || 0;
+
+  // Calculate active (upcoming) event count for this organizer in real time
+  const createdBy = event.createdBy;
+  const now = new Date();
+  const storedEvents = JSON.parse(localStorage.getItem('eventsData') || '[]');
+  const orgEvents = createdBy
+    ? storedEvents.filter(e => e.createdBy === createdBy && new Date(e.date) > now).length
+    : (event.organizer?.events || 0);
   
   // Update preview text in accordion header
   if (organizerPreview) {
@@ -1898,6 +2081,21 @@ function loadEventOrganizer(event) {
   }
 }
 
+// Load ticket link section
+function loadTicketLink(event) {
+  const ticketCard = document.getElementById('ticket-accordion-card');
+  const ticketBtn = document.getElementById('ticket-link-btn');
+  if (!ticketCard || !ticketBtn) return;
+
+  const link = event.ticketLink ? event.ticketLink.trim() : '';
+  if (link) {
+    ticketBtn.href = link;
+    ticketCard.style.display = '';
+  } else {
+    ticketCard.style.display = 'none';
+  }
+}
+
 // Helper: Extract YouTube video ID
 function extractYouTubeId(url) {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -1905,12 +2103,7 @@ function extractYouTubeId(url) {
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-// Helper: Extract Instagram post ID
-function extractInstagramId(url) {
-  const regExp = /instagram.com\/p\/([a-zA-Z0-9_-]+)/;
-  const match = url.match(regExp);
-  return match ? match[1] : null;
-}
+
 
 // Gallery lightbox
 window.currentEventGallery = [];
@@ -2246,32 +2439,43 @@ function hexToRgba(hex, alpha) {
 }
 
 function initializeEventDetailPage() {
-  // Add smooth scroll animations
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-  };
+  // On desktop (PC), show all cards immediately without scroll-triggered animations
+  const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1024px)').matches;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }, index * 100);
-      }
-    });
-  }, observerOptions);
-
-  // Observe content cards
   const cards = document.querySelectorAll('.content-card, .sidebar-card');
-  cards.forEach((card, index) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    card.style.transitionDelay = `${index * 0.1}s`;
-    observer.observe(card);
-  });
+
+  if (isDesktop) {
+    // Desktop: no lazy fade-in, everything visible from the start
+    cards.forEach((card) => {
+      card.style.opacity = '1';
+      card.style.transform = 'none';
+    });
+  } else {
+    // Mobile / tablet: keep scroll-triggered animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, index * 100);
+        }
+      });
+    }, observerOptions);
+
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      card.style.transitionDelay = `${index * 0.1}s`;
+      observer.observe(card);
+    });
+  }
 
   // Map button interaction
   const mapBtn = document.querySelector('.venue-map-btn');
@@ -2313,6 +2517,11 @@ function initializeAccordionSidebar() {
   accordionTriggers.forEach(trigger => {
     trigger.addEventListener('click', function(e) {
       e.preventDefault(); // Prevent any default button behavior
+
+      // Preserve scroll position on mobile to prevent auto-scroll after focus
+      const savedScrollY = window.scrollY;
+      // Remove focus from button so mobile browser won't scroll to keep it in view
+      this.blur();
       
       const isExpanded = this.getAttribute('aria-expanded') === 'true';
       const parentCard = this.closest('.accordion-card');
@@ -2343,9 +2552,13 @@ function initializeAccordionSidebar() {
         // Trigger reflow and set actual height
         setTimeout(() => {
           content.style.maxHeight = (height + 50) + 'px'; // Add buffer for padding
+          // Restore scroll position to prevent mobile browser from auto-scrolling after focus
+          window.scrollTo({ top: savedScrollY, behavior: 'instant' });
         }, 10);
       } else if (content) {
         content.style.maxHeight = '0px';
+        // Restore scroll position to prevent mobile browser from auto-scrolling after focus
+        requestAnimationFrame(() => window.scrollTo({ top: savedScrollY, behavior: 'instant' }));
       }
     });
     
@@ -2397,11 +2610,26 @@ function initializeGallery() {
 // Utility functions
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('tr-TR', {
     month: 'long',
     day: 'numeric',
     year: 'numeric'
   });
+}
+
+function formatTime(timeString) {
+  if (!timeString) return '';
+  // Already 24h format (e.g. "20:00") — return as-is
+  if (!timeString.includes('AM') && !timeString.includes('PM')) return timeString;
+  const [time, modifier] = timeString.trim().split(' ');
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours, 10);
+  if (modifier === 'AM') {
+    if (hours === 12) hours = 0;
+  } else {
+    if (hours !== 12) hours += 12;
+  }
+  return `${String(hours).padStart(2, '0')}:${minutes}`;
 }
 
 function formatPriceLevel(level) {
@@ -2777,7 +3005,7 @@ function updateDetailPageViewCount() {
   const viewCountElement = document.getElementById('view-count');
   
   if (viewCountElement) {
-    viewCountElement.textContent = `${viewCount} view${viewCount !== 1 ? 's' : ''}`;
+    viewCountElement.textContent = `${viewCount}`;
   }
 }
 
@@ -2795,7 +3023,7 @@ function initializeShareButtons() {
   // Generate share content
   const eventUrl = window.location.href;
   const eventTitle = event.title;
-  const eventText = `Check out ${eventTitle} on ${formatDate(event.date)} at ${event.venue}, ${event.city}!`;
+  const eventText = `${eventTitle} etkinliği - ${formatDate(event.date)} tarihinde ${event.venue}, ${event.city} adresinde!`;
   
   // Check if native share is available
   const nativeShareBtn = document.getElementById('native-share');
@@ -2819,7 +3047,7 @@ function initializeShareButtons() {
   if (copyLinkBtn) {
     copyLinkBtn.addEventListener('click', () => {
       copyToClipboard(eventUrl);
-      showShareNotification('Link copied to clipboard!');
+      showShareNotification('Bağlantı kopyalandı!');
     });
   }
   
@@ -2916,6 +3144,17 @@ function showShareNotification(message) {
 // Load events from localStorage and merge with default events
 function loadEventsFromStorage() {
   console.log('Loading events from localStorage...');
+
+  // Remove any hardcoded default events that have been explicitly deleted via CMS
+  const deletedIds = JSON.parse(localStorage.getItem('paxDeletedEventIds') || '[]');
+  if (deletedIds.length > 0) {
+    for (let i = eventsData.length - 1; i >= 0; i--) {
+      if (deletedIds.includes(eventsData[i].id)) {
+        eventsData.splice(i, 1);
+      }
+    }
+  }
+
   const storedEvents = localStorage.getItem('eventsData');
   if (storedEvents) {
     try {
@@ -2925,22 +3164,29 @@ function loadEventsFromStorage() {
       parsedEvents.forEach(storedEvent => {
         const existingIndex = eventsData.findIndex(e => e.id === storedEvent.id);
         if (existingIndex !== -1) {
-          // Update existing event, but preserve locationLink from default if not in storage
-          const defaultEvent = eventsData[existingIndex];
-          const hasStoredLink = storedEvent.locationLink && storedEvent.locationLink.trim() !== '';
-          const hasDefaultLink = defaultEvent.locationLink && defaultEvent.locationLink.trim() !== '';
-          
-          console.log(`Event ${storedEvent.id}: stored link=${hasStoredLink}, default link=${hasDefaultLink}`);
-          
-          eventsData[existingIndex] = {
-            ...defaultEvent,
-            ...storedEvent,
-            // If stored event doesn't have locationLink but default does, use default
-            locationLink: storedEvent.locationLink || defaultEvent.locationLink || ''
-          };
+          // If stored event is now a draft, remove it from visible eventsData
+          if (storedEvent.status === 'draft') {
+            eventsData.splice(existingIndex, 1);
+          } else {
+            // Update existing event, but preserve locationLink from default if not in storage
+            const defaultEvent = eventsData[existingIndex];
+            const hasStoredLink = storedEvent.locationLink && storedEvent.locationLink.trim() !== '';
+            const hasDefaultLink = defaultEvent.locationLink && defaultEvent.locationLink.trim() !== '';
+            
+            console.log(`Event ${storedEvent.id}: stored link=${hasStoredLink}, default link=${hasDefaultLink}`);
+            
+            eventsData[existingIndex] = {
+              ...defaultEvent,
+              ...storedEvent,
+              // If stored event doesn't have locationLink but default does, use default
+              locationLink: storedEvent.locationLink || defaultEvent.locationLink || ''
+            };
+          }
         } else {
-          // Add new event
-          eventsData.push(storedEvent);
+          // Add new event — only if published (or legacy event without status)
+          if (!storedEvent.status || storedEvent.status === 'publish') {
+            eventsData.push(storedEvent);
+          }
           console.log('Added new event:', storedEvent.id, '- locationLink:', storedEvent.locationLink);
         }
       });
@@ -2950,10 +3196,9 @@ function loadEventsFromStorage() {
   } else {
     console.log('No events in localStorage, using default events');
   }
-  
-  // Save updated eventsData back to localStorage to include locationLinks
-  localStorage.setItem('eventsData', JSON.stringify(eventsData));
-  console.log('Events saved back to localStorage with', eventsData.length, 'events');
+  // NOTE: Do NOT write eventsData back to localStorage here — eventsData only contains
+  // published events, and writing it back would destroy any saved drafts.
+  console.log('Events loaded into memory:', eventsData.length, 'published events');
 }
 
 // Initialize: Load events when page loads
@@ -3089,7 +3334,7 @@ function showCalendarOptions(event) {
     <div class="quick-menu-overlay" onclick="this.parentElement.remove()"></div>
     <div class="quick-menu-content">
       <div class="quick-menu-header">
-        <h3 id="calendar-menu-title">Add to Calendar</h3>
+        <h3 id="calendar-menu-title">Takvime Ekle</h3>
         <button class="quick-menu-close" onclick="this.closest('.quick-share-menu').remove()" aria-label="Close calendar menu">×</button>
       </div>
       <div class="quick-menu-buttons">
@@ -3097,13 +3342,13 @@ function showCalendarOptions(event) {
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5zm2 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
           </svg>
-          Google Calendar
+          Google Takvim
         </button>
         <button class="quick-menu-btn" onclick="addToAppleCalendar('${event.title}', '${event.description || ''}', '${event.venue}, ${event.city}', '${eventDate.toISOString()}', '${endDate.toISOString()}')" aria-label="Add to Apple Calendar">
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
           </svg>
-          Apple Calendar
+          Apple Takvim
         </button>
         <button class="quick-menu-btn" onclick="addToOutlookCalendar('${event.title}', '${event.description || ''}', '${event.venue}, ${event.city}', '${eventDate.toISOString()}', '${endDate.toISOString()}')" aria-label="Add to Outlook Calendar">
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -3136,7 +3381,7 @@ function convertTo24Hour(time12h) {
 // Share functions
 window.copyEventLink = function(url) {
   copyToClipboard(url);
-  showShareNotification('Link copied to clipboard!');
+  showShareNotification('Bağlantı kopyalandı!');
   document.querySelector('.quick-share-menu')?.remove();
 };
 

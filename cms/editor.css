@@ -3,6 +3,128 @@
    Updated: 2026-03-27 (Gallery file upload)
    =========================== */
 
+/* ===========================
+   PREVIEW MODAL
+   =========================== */
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: previewBackdropIn 0.3s ease forwards;
+}
+
+@keyframes previewBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.preview-modal-container {
+  position: relative;
+  width: calc(100% - 48px);
+  height: calc(100% - 48px);
+  max-width: 1280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  animation: previewContainerIn 0.35s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes previewContainerIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.preview-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  z-index: 2;
+  gap: 1rem;
+  transition: opacity 0.3s ease;
+}
+
+.preview-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.preview-spinner {
+  width: 52px;
+  height: 52px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-loading-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
+
+.preview-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  transform: none;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  padding: 7px 14px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.preview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.preview-iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+
+
 .editor-mode {
   background: radial-gradient(circle at top, rgba(17, 156, 195, 0.08), transparent 70%), #000000;
 }
@@ -458,6 +580,7 @@
 .sidebar-input {
   width: 100%;
   background: rgba(255, 255, 255, 0.03);
+  background-color: #0d0d0d;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -465,6 +588,7 @@
   font-size: 0.95rem;
   font-family: inherit;
   transition: all 0.3s ease;
+  color-scheme: dark;
 }
 
 .sidebar-input:focus {
@@ -476,11 +600,18 @@
 
 select.sidebar-input {
   appearance: none;
+  background-color: #111111;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23119cc3' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   padding-right: 2.5rem;
   cursor: pointer;
+  color-scheme: dark;
+}
+
+select.sidebar-input option {
+  background-color: #111111;
+  color: #e0e0e0;
 }
 
 /* Artist Editor List */
